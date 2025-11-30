@@ -1,0 +1,388 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>MCQ Test - Fixed</title>
+<style>
+  body{
+    background-color:#6879E3;
+    font-family: Arial, Helvetica, sans-serif;
+    margin:0;
+    padding:0;
+  }
+  .container{
+    position: relative;
+    margin: 20px auto;
+    width: 850px;
+    min-height: 640px;
+    border: 1px solid #000;
+    border-radius:15px;
+    background:#fff;
+    padding-bottom:60px; 
+    box-sizing: border-box;
+  }
+  .header{
+    background-color: #5644E5;
+    height:128px;
+    padding:20px;
+    text-align:center;
+    color: #FFF;
+    border-radius:15px 15px 0px 0px;
+  }
+
+ 
+  #frontPage { padding:20px; }
+  .info-row {
+    display:flex;
+    gap:15px;
+    margin-bottom:18px;
+  }
+  .info-box{
+    flex:1;
+    background:#E6E6FF;
+    padding:15px;
+    border-radius:10px;
+    font-size:18px;
+    box-sizing:border-box;
+  }
+
+ 
+  #startBtn{
+    position:absolute;
+    right:20px;
+    bottom:20px;
+    background:#5644E5;
+    color:#fff;
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:18px;
+  }
+
+ 
+  #timer{
+    font-size:18px;
+    font-weight:bold;
+    color:#b30000;
+    text-align:right;
+    padding:10px 20px;
+    display:none;
+  }
+  #quizBox{
+    padding:20px;
+    display:none;
+  }
+  .question{
+    font-size:20px;
+    margin:12px 0;
+  }
+  .options{
+    margin-left:8px;
+  }
+  .option-label{
+    display:block;
+    margin:6px 0;
+    cursor:pointer;
+  }
+  #nextBtn, #submitBtn {
+    background:#5644E5;
+    color:#fff;
+    padding:10px 18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    margin-top:12px;
+  }
+  #result{
+    padding:20px;
+    font-size:20px;
+    font-weight:bold;
+    display:none;
+  }
+
+ 
+  @media (max-width:900px){
+    .container{ width:95%; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>HTML Test for ND & NE Batch</h1>
+      <div style="padding:6px 12px;">
+        Test your understanding of HTML fundamentals
+      </div>
+    </div>
+
+    
+    <div id="frontPage">
+      <div class="info-row">
+        <div class="info-box"><strong>Total Questions:</strong> <span id="totalQuestions">5</span></div>
+        <div class="info-box"><strong>Time per Question:</strong> <span id="timePerQuestion">10</span> seconds</div>
+        <div class="info-box"><strong>Note:</strong> All questions are compulsory.</div>
+      </div>
+      <div style="color:#333; font-size:14px;">
+        Read the instructions and click <strong>Start Test</strong> (button at bottom-right) to begin.
+      </div>
+
+      
+      <button id="startBtn" aria-label="Start Test">Start Test</button>
+    </div>
+
+
+    <div id="timer">Time Left: <span id="timeValue">00</span>s</div>
+
+    
+    <div id="quizBox"></div>
+
+    
+    <div id="result"></div>
+  </div>
+
+<script>
+const questions = [
+  {
+    q: "HTML stands for?",
+    options: [
+      "Hyper Trainer Marking Language",
+      "Hyper Text Markup Language",
+      "Hyper Text Marketing Language",
+      "High Text Machine Language"
+    ],
+    answer: 1
+  },
+  {
+    q: "Which tag is used to insert an image?",
+    options: [
+      "<img>",
+      "<image>",
+      "<pic>",
+      "<photo>"
+    ],
+    answer: 0
+  },
+  {
+    q: "Which tag is used for the largest heading?",
+    options: [
+      "<h6>",
+      "<h3>",
+      "<h1>",
+      "<header>"
+    ],
+    answer: 2
+  },
+  {
+    q: "Which HTML attribute is used to define inline styles?",
+    options: [
+      "class",
+      "style",
+      "font",
+      "design"
+    ],
+    answer: 1
+  },
+  {
+    q: "Which tag is used to create a hyperlink?",
+    options: [
+      "<link>",
+      "<ref>",
+      "<a>",
+      "<href>"
+    ],
+    answer: 2
+  }
+];
+
+document.getElementById('totalQuestions').textContent = questions.length;
+
+
+let currentIndex = 0;
+const timePerQuestion = 10; // seconds (can be changed)
+let timeLeft = timePerQuestion;
+let timerInterval = null;
+
+
+function clearElement(el){ while(el.firstChild) el.removeChild(el.firstChild); }
+
+function showTimer(){ 
+  document.getElementById('timer').style.display = 'block';
+  document.getElementById('timeValue').textContent = timeLeft;
+}
+function hideTimer(){ document.getElementById('timer').style.display = 'none'; }
+
+
+const startBtn = document.getElementById('startBtn');
+startBtn.addEventListener('click', () => {
+
+  document.getElementById('frontPage').style.display = 'none';
+  document.getElementById('quizBox').style.display = 'block';
+  currentIndex = 0;
+  timeLeft = timePerQuestion;
+  renderQuestion(currentIndex);
+  startTimer();
+});
+
+
+function startTimer(){
+  stopTimer(); 
+  showTimer();
+  document.getElementById('timeValue').textContent = timeLeft;
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timeValue').textContent = timeLeft;
+    if(timeLeft <= 0){
+  
+      stopTimer();
+      
+      const selected = document.querySelector('input[name="option"]:checked');
+      if(!selected){
+       
+        questions[currentIndex].selected = null;
+      } else {
+        questions[currentIndex].selected = parseInt(selected.value, 10);
+      }
+      
+      currentIndex++;
+      if(currentIndex < questions.length){
+        timeLeft = timePerQuestion;
+        renderQuestion(currentIndex);
+        startTimer();
+      } else {
+        finishQuiz();
+      }
+    }
+  }, 1000);
+}
+
+function stopTimer(){
+  if(timerInterval !== null){
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+
+function renderQuestion(index){
+  const box = document.getElementById('quizBox');
+  clearElement(box);
+
+  const qObj = questions[index];
+
+  
+  const qDiv = document.createElement('div');
+  qDiv.className = 'question';
+  qDiv.textContent = (index + 1) + '. ' + qObj.q;
+  box.appendChild(qDiv);
+
+ 
+  const opts = document.createElement('div');
+  opts.className = 'options';
+  box.appendChild(opts);
+
+  
+  qObj.options.forEach((optText, i) => {
+    const label = document.createElement('label');
+    label.className = 'option-label';
+
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'option';
+    radio.value = String(i);
+    radio.id = 'opt-' + i;
+
+  
+    if (qObj.selected === i) radio.checked = true;
+
+    const span = document.createElement('span');
+   
+    span.textContent = ' ' + optText;
+
+    label.appendChild(radio);
+    label.appendChild(span);
+    opts.appendChild(label);
+  });
+
+  
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.id = (index === questions.length - 1) ? 'submitBtn' : 'nextBtn';
+  btn.textContent = (index === questions.length - 1) ? 'Submit Test' : 'Next';
+  btn.addEventListener('click', onNextClicked);
+  box.appendChild(btn);
+}
+
+
+function onNextClicked(){
+
+  const selected = document.querySelector('input[name="option"]:checked');
+  if(!selected){
+    alert('This question is compulsory. Please select an option to continue.');
+    return;
+  }
+  
+  questions[currentIndex].selected = parseInt(selected.value, 10);
+
+  currentIndex++;
+  if(currentIndex < questions.length){
+    timeLeft = timePerQuestion;
+    renderQuestion(currentIndex);
+    
+    stopTimer();
+    startTimer();
+  } else {
+    finishQuiz();
+  }
+}
+
+
+function finishQuiz(){
+  stopTimer();
+  hideTimer();
+  document.getElementById('quizBox').style.display = 'none';
+
+  let score = 0;
+  questions.forEach(q => {
+    if(typeof q.selected === 'number' && q.selected === q.answer){
+      score++;
+    }
+  });
+
+  const res = document.getElementById('result');
+  res.style.display = 'block';
+
+  const details = document.createElement('div');
+  details.style.fontSize = '14px';
+  questions.forEach((q,i) => {
+    const p = document.createElement('p');
+    const sel = q.selected === null || q.selected === undefined ? 'Unanswered' : q.options[q.selected];
+    const correct = q.options[q.answer];
+    p.textContent = `Q${i+1}: Your answer: ${sel}  —  Correct: ${correct}`;
+    details.appendChild(p);
+  });
+  res.appendChild(details);
+
+  
+  const retry = document.createElement('button');
+  retry.textContent = 'Retake Test';
+  retry.style.marginTop = '12px';
+  retry.addEventListener('click', () => {
+   
+    questions.forEach(q => delete q.selected);
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('frontPage').style.display = 'block';
+    document.getElementById('quizBox').style.display = 'none';
+    document.getElementById('startBtn').style.display = 'inline-block';
+  });
+  res.appendChild(retry);
+}
+
+
+window.addEventListener('beforeunload', () => stopTimer());
+</script>
+</body>
+</html>
+
